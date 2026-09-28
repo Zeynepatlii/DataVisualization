@@ -532,22 +532,9 @@ Aşağıdaki soruları kod yazmadan cevaplamaya çalışınız:
 6. `geom_point()` Grammar of Graphics'in hangi bileşenine karşılık gelir?
 7. `theme_minimal()` veriyi mi, grafiğin görünümünü mü değiştirir?
 
-# 21. Ders Özeti
 
-Bu uygulamada:
 
-- veri değişkenlerinin görsel özelliklere nasıl eşlendiğini,
-- `aes()` fonksiyonunun rolünü,
-- mapping ve setting arasındaki farkı,
-- renk, boyut, şekil ve saydamlık kullanımını,
-- geometry kavramını,
-- Grammar of Graphics yaklaşımını,
-- mapping ve scale arasındaki farkı,
-- `labs()`, `annotate()` ve tema kullanımını
-
-inceledik.
-
-Bu haftanın en önemli iki cümlesi:
+Hatırlatma
 
 > **Mapping**, hangi değişkenin hangi görsel özelliğe bağlanacağını belirler.
 
