@@ -1,0 +1,534 @@
+---
+title: "Veri Görselleştirme – Hafta 2"
+author: "Dr. Öğr. Üyesi Zeynep ATLI"
+date: "2026"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: cosmo
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.width = 8, fig.height = 5)
+```
+
+# Mapping Data to Aesthetics
+
+Bu uygulamada, veri setindeki değişkenlerin grafik üzerindeki **görsel özelliklere (aesthetics)** nasıl eşlendiğini inceleyeceğiz. Temel amacımız yalnızca `ggplot2` kodlarını çalıştırmak değil, bir grafiğin hangi bileşenlerden oluştuğunu anlamaktır.
+
+Bir veri tablosundaki değerleri doğrudan görmeyiz. Veriyi; **konum, renk, boyut, şekil, saydamlık ve çizgi tipi** gibi görsel özellikler aracılığıyla görünür hale getiririz.
+
+Bu haftanın temel sorusu şudur:
+
+> Bir değişkeni grafikte göstermek istediğimizde, onu hangi görsel özellikle temsil etmeliyiz?
+
+# 1. Gerekli paket
+
+Bu uygulamada `ggplot2` paketini kullanacağız.
+
+```{r}
+# Paketi daha önce yüklemediyseniz bir kez çalıştırın:
+# install.packages("ggplot2")
+
+library(ggplot2)
+```
+
+# 2. Aesthetics (Görsel Özellikler) Nedir?
+
+`ggplot2` terminolojisinde **aesthetic**, veriyi grafik üzerinde temsil etmek için kullanılan görsel özellikleri ifade eder. Buradaki "estetik" sözcüğü grafiğin güzel görünmesi anlamına gelmez.
+
+Yaygın görsel özelliklerden bazıları şunlardır:
+
+- `x`: yatay konum
+- `y`: dikey konum
+- `color`: renk
+- `fill`: dolgu rengi
+- `size`: boyut
+- `shape`: şekil
+- `alpha`: saydamlık
+- `linetype`: çizgi tipi
+
+Her görsel özellik her veri türü için aynı derecede uygun değildir. Örneğin sürekli bir değişkeni çok sayıda farklı şekille temsil etmek çoğu durumda iyi bir tercih değildir.
+
+# 3. Kullanacağımız Veri: mtcars
+
+R ile birlikte gelen `mtcars` veri setini kullanacağız. Veri seti farklı otomobillere ilişkin teknik özellikleri içermektedir.
+
+```{r}
+df <- mtcars
+
+head(df)
+```
+
+Veriyi görselleştirmeden önce yapısını incelemek önemlidir.
+
+```{r}
+str(df)
+dim(df)
+names(df)
+```
+
+Bu uygulamada özellikle şu değişkenleri kullanacağız:
+
+- `mpg`: yakıt verimliliği (miles per gallon)
+- `disp`: motor hacmi
+- `hp`: motor gücü
+- `wt`: araç ağırlığı
+- `cyl`: silindir sayısı
+
+**Not:** `cyl` R içinde sayısal görünmesine rağmen 4, 6 ve 8 silindirli araç gruplarını temsil eder. Bu nedenle bazı grafiklerde `factor(cyl)` biçiminde kategorik olarak ele alacağız.
+
+# 4. İlk ggplot Grafiği
+
+Önce motor hacmi (`disp`) ile yakıt verimliliği (`mpg`) arasındaki ilişkiyi çizelim.
+
+```{r}
+ggplot(data = df,
+       aes(x = disp, y = mpg)) +
+  geom_point()
+```
+
+Bu kod üç temel parçadan oluşur:
+
+1. `data = df`: Hangi veri setinin kullanılacağını belirtir.
+2. `aes(x = disp, y = mpg)`: Değişkenleri görsel özelliklere eşler.
+3. `geom_point()`: Her gözlemi bir nokta olarak gösterir.
+
+Grafikteki **her nokta bir otomobili** temsil eder. Motor hacmi arttıkça `mpg` değerinin genel olarak azaldığı görülmektedir. Ancak bu grafik tek başına nedensellik göstermez.
+
+# 5. Mapping Nedir?
+
+**Mapping**, veri setindeki bir değişkenin bir görsel özelliğe bağlanmasıdır.
+
+Örneğin:
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = hp)) +
+  geom_point(size = 3)
+```
+
+Burada `hp` değişkeni `color` özelliğine eşlenmiştir. Dolayısıyla noktaların rengi otomobillerin motor gücüne göre değişmektedir.
+
+Başka bir ifadeyle:
+
+**Veri değişkeni → görsel özellik**
+
+şeklinde bir ilişki kurulmuştur.
+
+# 6. Mapping ve Setting Arasındaki Fark
+
+Bu ayrım `ggplot2` öğrenirken en önemli konulardan biridir.
+
+## 6.1. Setting: Sabit bir görünüm vermek
+
+```{r}
+ggplot(df,
+       aes(x = disp, y = mpg)) +
+  geom_point(
+    color = "steelblue",
+    size = 3,
+    alpha = 0.7
+  )
+```
+
+Burada bütün noktalar aynı renkte ve aynı büyüklüktedir. `color`, `size` ve `alpha` herhangi bir değişkene bağlanmamıştır.
+
+Bu nedenle bunlar **mapping değil, sabit görsel ayarlardır (setting)**.
+
+## 6.2. Mapping: Görsel özelliği veriye bağlamak
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = hp,
+           size = wt)) +
+  geom_point(alpha = 0.7)
+```
+
+Bu kez:
+
+- renk (`color`) → motor gücüne (`hp`),
+- boyut (`size`) → araç ağırlığına (`wt`)
+
+bağlanmıştır.
+
+Dolayısıyla renk ve boyut artık **veri taşımaktadır**.
+
+> Temel kural: Bir değişkeni görsel özelliğe bağlamak istiyorsanız genellikle `aes()` içine yazarsınız. Sabit bir görünüm vermek istiyorsanız özelliği `aes()` dışında tanımlarsınız.
+
+# 7. Renk (color) ile Kategorik Değişken Gösterme
+
+Silindir sayısını farklı renklerle gösterelim.
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = factor(cyl))) +
+  geom_point(size = 3)
+```
+
+`factor(cyl)` kullanmamızın nedeni silindir sayısını burada sürekli bir ölçümden çok **araç grupları** olarak ele almamızdır.
+
+Grafiğin açıklamasını daha anlaşılır hale getirebiliriz:
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = factor(cyl))) +
+  geom_point(size = 3) +
+  labs(
+    x = "Motor hacmi",
+    y = "Yakıt verimliliği (mpg)",
+    color = "Silindir sayısı"
+  )
+```
+
+# 8. Shape ile Grupları Ayırma
+
+Kategorik değişkenler şekil kullanılarak da temsil edilebilir.
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           shape = factor(cyl))) +
+  geom_point(size = 3) +
+  labs(shape = "Silindir sayısı")
+```
+
+Şekil, az sayıda kategori olduğunda kullanışlıdır. Çok fazla kategori olduğunda şekilleri birbirinden ayırmak zorlaşır.
+
+# 9. Birden Fazla Aesthetic Kullanmak
+
+Bir grafikte birden fazla değişkeni aynı anda gösterebiliriz.
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = hp,
+           size = wt,
+           shape = factor(cyl))) +
+  geom_point(alpha = 0.8) +
+  labs(
+    x = "Motor hacmi (cu. in.)",
+    y = "Yakıt verimliliği (mpg)",
+    color = "Motor gücü (hp)",
+    size = "Ağırlık",
+    shape = "Silindir"
+  )
+```
+
+Bu grafikte aynı gözlem hakkında birden fazla bilgi gösterilmektedir:
+
+- x konumu → `disp`
+- y konumu → `mpg`
+- renk → `hp`
+- boyut → `wt`
+- şekil → `cyl`
+
+Ancak daha fazla değişken gösterebilmek her zaman daha iyi bir grafik anlamına gelmez. Görsel karmaşıklık arttıkça grafiğin okunabilirliği azalabilir.
+
+# 10. Alpha: Saydamlık
+
+`alpha`, noktaların saydamlığını kontrol eder.
+
+```{r}
+ggplot(df,
+       aes(x = disp, y = mpg)) +
+  geom_point(size = 4, alpha = 0.4)
+```
+
+`alpha` değeri 0'a yaklaştıkça nesne daha saydam, 1'e yaklaştıkça daha opak görünür. Özellikle çok sayıda gözlemin üst üste geldiği grafiklerde yararlıdır.
+
+# 11. Geometry: Veriyi Nasıl Göstereceğiz?
+
+Mapping bize **hangi değişkenin hangi görsel özelliğe bağlanacağını** söyler. Geometry ise bu bilgiyi **hangi geometrik biçimle göstereceğimizi** belirler.
+
+Örneğin:
+
+- `geom_point()` → nokta
+- `geom_line()` → çizgi
+- `geom_bar()` → sütun
+- `geom_histogram()` → histogram
+- `geom_boxplot()` → kutu grafiği
+- `geom_density()` → yoğunluk eğrisi
+
+Aynı veri farklı geometrilerle farklı sorulara cevap verebilir.
+
+## Histogram örneği
+
+```{r}
+ggplot(df, aes(x = mpg)) +
+  geom_histogram(bins = 8, color = "white") +
+  labs(x = "Yakıt verimliliği (mpg)", y = "Frekans")
+```
+
+## Kutu grafiği örneği
+
+```{r}
+ggplot(df,
+       aes(x = factor(cyl),
+           y = mpg)) +
+  geom_boxplot() +
+  labs(x = "Silindir sayısı", y = "Yakıt verimliliği (mpg)")
+```
+
+# 12. Grammar of Graphics
+
+`ggplot2`, **Grammar of Graphics** yaklaşımını temel alır. Bir grafik tek bir nesne olarak değil, birbiriyle ilişkili bileşenlerin birleşimi olarak düşünülebilir.
+
+Basitleştirilmiş biçimde:
+
+**Data → Aesthetics → Geometry → Scales → Facets → Coordinates → Theme**
+
+Örneğin:
+
+```{r}
+ggplot(data = df,
+       aes(x = disp,
+           y = mpg,
+           color = hp)) +
+  geom_point()
+```
+
+Burada:
+
+- **Data:** `df`
+- **Aesthetic mapping:** `disp`, `mpg`, `hp`
+- **Geometry:** `geom_point()`
+
+bulunmaktadır.
+
+Bu yaklaşımın önemli avantajı, grafiği ezberlenecek tek bir komut yerine **katmanlardan oluşan bir yapı** olarak düşünmemizi sağlamasıdır.
+
+# 13. Scale Nedir?
+
+Mapping ve scale aynı şey değildir.
+
+**Mapping**, hangi değişkenin hangi görsel özelliğe bağlanacağını belirler.
+
+**Scale**, veri değerlerinin bu görsel özellik üzerinde **nasıl temsil edileceğini** belirler.
+
+Örneğin:
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = hp)) +
+  geom_point(size = 3) +
+  scale_color_gradient(
+    low = "lightblue",
+    high = "darkblue"
+  )
+```
+
+Burada:
+
+```r
+color = hp
+```
+
+bir **mapping** işlemidir.
+
+```r
+scale_color_gradient(...)
+```
+
+ise bu değerlerin hangi renklerle gösterileceğini düzenleyen **scale** işlemidir.
+
+Kısaca:
+
+> Mapping = **Neyi neye bağlıyorum?**  
+> Scale = **Bu bağlantıyı nasıl gösteriyorum?**
+
+# 14. Başlık ve Eksen İsimleri: labs()
+
+Grafiklerin okuyucu tarafından anlaşılması için açıklayıcı başlıklar ve eksen isimleri kullanılmalıdır.
+
+```{r}
+ggplot(df,
+       aes(x = disp, y = mpg)) +
+  geom_point(size = 3) +
+  labs(
+    title = "Motor Hacmi ve Yakıt Verimliliği",
+    subtitle = "mtcars veri seti",
+    x = "Motor hacmi (cu. in.)",
+    y = "Yakıt verimliliği (mpg)",
+    caption = "Kaynak: R mtcars veri seti"
+  )
+```
+
+# 15. Grafik İçine Metin Eklemek
+
+Bir grafikte önemli bir bölgeyi veya gözlemi açıklamak için `annotate()` kullanılabilir.
+
+```{r}
+ggplot(df,
+       aes(x = disp, y = mpg)) +
+  geom_point(size = 3) +
+  annotate(
+    "text",
+    x = 350,
+    y = 30,
+    label = "Yüksek motor hacmi\nve düşük mpg",
+    size = 4
+  )
+```
+
+# 16. Grafik Üzerinde Ok Kullanmak
+
+Bir noktaya veya bölgeye dikkat çekmek için `annotate()` ile segment ve ok ekleyebiliriz.
+
+```{r}
+ggplot(df,
+       aes(x = disp, y = mpg)) +
+  geom_point(size = 3) +
+  annotate(
+    "segment",
+    x = 320, xend = 450,
+    y = 27, yend = 15,
+    arrow = arrow(length = unit(0.25, "cm"))
+  ) +
+  annotate(
+    "text",
+    x = 300,
+    y = 28,
+    label = "Bu bölgeye dikkat",
+    size = 4
+  )
+```
+
+Ok kullanmak mümkün olsa da her grafikte gerekli değildir. Vurgu, yalnızca okuyucunun dikkatini gerçekten yönlendirmek istediğimiz durumlarda kullanılmalıdır.
+
+# 17. Theme: Grafiğin Genel Görünümü
+
+Tema, grafikteki veri eşlemesini değiştirmez. Arka plan, grid çizgileri ve genel görsel düzen gibi öğeleri kontrol eder.
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = factor(cyl))) +
+  geom_point(size = 3) +
+  labs(
+    x = "Motor hacmi",
+    y = "Yakıt verimliliği (mpg)",
+    color = "Silindir"
+  ) +
+  theme_minimal()
+```
+
+Başka bir örnek:
+
+```{r}
+ggplot(df,
+       aes(x = disp, y = mpg)) +
+  geom_point(size = 3) +
+  theme_classic()
+```
+
+# 18. Tam Bir ggplot Örneği
+
+Şimdi öğrendiğimiz bazı bileşenleri tek grafikte birleştirelim.
+
+```{r}
+ggplot(df,
+       aes(x = disp,
+           y = mpg,
+           color = hp,
+           size = wt,
+           shape = factor(cyl))) +
+  geom_point(alpha = 0.8) +
+  scale_color_gradient(
+    low = "skyblue",
+    high = "navy"
+  ) +
+  labs(
+    title = "Otomobillerin Motor Özellikleri ve Yakıt Verimliliği",
+    subtitle = "R – mtcars veri seti",
+    x = "Motor hacmi (cu. in.)",
+    y = "Yakıt verimliliği (mpg)",
+    color = "Motor gücü",
+    size = "Ağırlık",
+    shape = "Silindir sayısı"
+  ) +
+  theme_minimal()
+```
+
+Bu kodu artık katmanlarına ayırabiliriz:
+
+1. **Data:** `df`
+2. **Mapping:** `disp`, `mpg`, `hp`, `wt`, `cyl`
+3. **Geometry:** `geom_point()`
+4. **Scale:** `scale_color_gradient()`
+5. **Labels:** `labs()`
+6. **Theme:** `theme_minimal()`
+
+# 19. Uygulama Soruları
+
+Aşağıdaki soruları kod yazarak tamamlayınız.
+
+## Soru 1
+
+`wt` değişkenini x eksenine, `mpg` değişkenini y eksenine yerleştirerek bir saçılım grafiği oluşturunuz.
+
+```{r eval=FALSE}
+# Kodunuzu buraya yazınız.
+```
+
+## Soru 2
+
+Birinci grafikteki noktaların rengini sabit olarak `steelblue` yapınız. Bu işlem mapping mi, setting mi?
+
+```{r eval=FALSE}
+# Kodunuzu buraya yazınız.
+```
+
+## Soru 3
+
+`cyl` değişkenini renge eşleyiniz. Önce `color = cyl`, ardından `color = factor(cyl)` kullanarak iki grafiği karşılaştırınız.
+
+```{r eval=FALSE}
+# Kodunuzu buraya yazınız.
+```
+
+## Soru 4
+
+`hp` değişkenini renge, `wt` değişkenini boyuta eşleyiniz.
+
+```{r eval=FALSE}
+# Kodunuzu buraya yazınız.
+```
+
+## Soru 5
+
+Grafiğinize anlamlı bir başlık, x ve y ekseni isimleri ekleyiniz ve `theme_minimal()` kullanınız.
+
+```{r eval=FALSE}
+# Kodunuzu buraya yazınız.
+```
+
+# 20. Kendinizi Kontrol Edin
+
+Aşağıdaki soruları kod yazmadan cevaplamaya çalışınız:
+
+1. `aes()` fonksiyonunun temel görevi nedir?
+2. `geom_point(color = "red")` ile `aes(color = cyl)` arasındaki temel fark nedir?
+3. `color = hp` ifadesinde renk veri taşır mı?
+4. `size = 3` ifadesinde boyut veri taşır mı?
+5. Mapping ile scale arasındaki fark nedir?
+6. `geom_point()` Grammar of Graphics'in hangi bileşenine karşılık gelir?
+7. `theme_minimal()` veriyi mi, grafiğin görünümünü mü değiştirir?
+

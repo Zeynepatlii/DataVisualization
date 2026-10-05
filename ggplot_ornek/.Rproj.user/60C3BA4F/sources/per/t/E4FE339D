@@ -1,27 +1,27 @@
 {
-    "id": "B1253A6B",
-    "path": "C:/Users/ZEYNEP/Desktop/Data Visulation/ggplot_ornek/Ilk_grafik.R",
-    "project_path": "Ilk_grafik.R",
+    "id": "E4FE339D",
+    "path": "C:/Users/ZEYNEP/Desktop/Data Visulation/ggplot_ornek/scales.R",
+    "project_path": "scales.R",
     "type": "r_source",
-    "hash": "436010676",
+    "hash": "2951264128",
     "contents": "",
     "dirty": false,
-    "created": 1790246773457.0,
+    "created": 1791185939318.0,
     "source_on_save": false,
-    "relative_order": 1,
+    "relative_order": 6,
     "properties": {
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "131,0",
-        "scrollLine": "0"
+        "cursorPosition": "183,55",
+        "scrollLine": "165"
     },
     "folds": "",
-    "lastKnownWriteTime": 1790686332,
+    "lastKnownWriteTime": 1791186287,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1790686332458,
+    "last_content_update": 1791186287410,
     "read_only": false,
     "read_only_alternatives": []
 }

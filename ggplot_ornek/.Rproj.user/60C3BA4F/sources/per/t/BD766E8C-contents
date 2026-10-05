@@ -1,0 +1,654 @@
+---
+title: "Veri Görselleştirme – Hafta 3"
+subtitle: "Grafiklerin Grameri, Geometriler, Katmanlar ve Ölçekler"
+author: "Dr. Öğr. Üyesi Zeynep ATLI"
+date: ""
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4.5
+)
+```
+
+# Grafiklerin Grameri
+
+**Grafiklerin Grameri (Grammar of Graphics)**, bir veri görselleştirmesini farklı bileşenlerin bir araya gelmesiyle oluşan bir yapı olarak ele alır. `ggplot2` de bu yaklaşıma dayanır.
+
+Bu hafta öncelikle üç temel bileşene odaklanacağız:
+
+1. **Veri (Data)**
+2. **Görsel özellikler ve eşleme (Aesthetics & Mapping)**
+3. **Geometriler (Geometries)**
+
+En temel haliyle:
+
+> **Grafik = Veri + Görsel Eşleme + Geometri**
+
+```{r grammar-template, eval=FALSE}
+ggplot(data = veri,
+       aes(gorsel_eslemeler)) +
+  geom_...()
+```
+
+## Veri (Data)
+
+**Veri**, grafikte görselleştirmek istediğimiz gözlemleri ve değişkenleri içeren veri setidir. ggplot2 paketinde veri formatının
+data.frame ya da tibble ( R programlaa dilinde tidyverse ekosistemi tarafından geliştirilen, klasik data.frame (veri çerçevesi) yapısının daha modern, düzenli ve katı bir versiyonudur.) formatında olması gerekir. 
+
+```{r data-example, eval=FALSE}
+ggplot(data = mtcars)
+```
+
+Burada `mtcars`, grafiğin oluşturulmasında kullanılacak veri setidir. Ancak yalnızca veri setini belirtmek yeterli değildir. Hangi değişkenlerin hangi görsel özelliklerle temsil edileceğinin de belirlenmesi gerekir.
+
+## Görsel Özellikler (Aesthetics)
+
+**Aesthetics**, verilerin grafikte temsil edilmesinde kullanılan görsel özelliklerdir. Değişkenlerin görsel özelliklerle ilişkilendirilmesi olarak da tanımlanabilir. Bir değişken; konum, renk, boyut, şekil veya saydamlık gibi farklı görsel özelliklerle temsil edilebilir. 
+
+```{r aesthetics-table, echo=FALSE}
+aesthetics <- data.frame(
+  `R İfadesi` = c(
+    "x", "y", "color / colour", "fill", "size",
+    "alpha", "shape", "linetype", "linewidth", "group"
+  ),
+  `Türkçe Karşılığı` = c(
+    "Yatay konum", "Dikey konum",   "Gözlemlerin rengi", "Dolgu rengi", "Boyut",
+    "Saydamlık", "Şekil", "Çizgi tipi", "Çizgi kalınlığı", "Gruplama"
+  ),
+  `Ne Anlama Gelir?` = c(
+    "Gözlemlerin x eksenindeki konumunu belirler.",
+    "Gözlemlerin y eksenindeki konumunu belirler.",
+    "Nokta ve çizgilerin rengini; bazı geometrilerde kenar rengini belirler.",
+    "Çubuk, kutu ve alan gibi geometrilerin iç dolgu rengini belirler.",
+    "Nokta veya metinlerin büyüklüğünü belirler.",
+    "Görsel öğelerin saydamlık düzeyini belirler (0–1).",
+    "Noktaların daire, kare, üçgen vb. biçimini belirler.",
+    "Çizginin düz, kesikli, noktalı vb. biçimini belirler.",
+    "Çizgilerin kalınlığını belirler.",
+    "Gözlemlerin hangi gruplar halinde birlikte ele alınacağını belirler."
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(aesthetics, align = c("l", "l", "l"))
+```
+
+### Mapping (Eşleme) nedir?
+
+Bir veri değişkeninin görsel bir özelliğe bağlanmasına **mapping (eşleme)** denir.
+
+```{r mapping-example, eval=FALSE}
+ggplot(
+  data = mtcars,
+  aes(
+    x = disp,
+    y = mpg,
+    color = hp
+  )
+)
+```
+
+Bu kodda:
+
+- `disp → x`: Motor hacmi yatay konuma,
+- `mpg → y`: Yakıt verimliliği dikey konuma,
+- `hp → color`: Motor gücü renge eşlenmiştir.
+
+> **Aesthetic görsel özelliği, mapping ise veri değişkeninin bu görsel özelliğe bağlanmasını ifade eder.**
+
+### `color` ve `fill` arasındaki fark
+
+`color` ve `fill` aynı şey değildir. Örneğin çubuk grafiklerde `color` çubuğun kenar rengini, `fill` ise iç dolgu rengini kontrol eder.
+
+```{r color-fill, eval=FALSE}
+ggplot(mtcars, aes(x = factor(cyl))) +
+  geom_bar(
+    color = "black",
+    fill = "steelblue"
+  )
+```
+
+## Geometriler (Geometries)
+
+**Geometri**, verilerin grafikte hangi geometrik biçimde gösterileceğini belirler. `ggplot2` içerisinde geometriler `geom_...()` fonksiyonlarıyla tanımlanır.
+
+```{r geoms-table, echo=FALSE}
+geoms <- data.frame(
+  `ggplot2 Fonksiyonu` = c(
+    "geom_area()",
+    "geom_dotplot()",
+    "stat_qq()",
+    "geom_quantile()",
+    "geom_text()",
+    "geom_point()",
+    "geom_line()",
+    "geom_bar()",
+    "geom_col()",
+    "geom_histogram()",
+    "geom_density()",
+    "geom_boxplot()",
+    "geom_violin()",
+    "geom_jitter()",
+    "geom_smooth()",
+    "geom_tile()"
+  ),
+  
+  `Grafik / Gösterim` = c(
+    "Alan grafiği",
+    "Nokta dağılım grafiği",
+    "Q-Q grafiği",
+    "Kantil regresyon grafiği",
+    "Metin",
+    "Saçılım grafiği",
+    "Çizgi grafiği",
+    "Çubuk grafik",
+    "Sütun grafik",
+    "Histogram",
+    "Yoğunluk grafiği",
+    "Kutu grafiği",
+    "Keman grafiği",
+    "Jitter grafiği",
+    "Eğilim çizgisi",
+    "Karo / hücre grafiği"
+  ),
+  
+  `Temel Kullanım` = c(
+    "X boyunca değişen nicel değerlerin büyüklüğünü alanla gösterir",
+    "Nicel bir değişkenin dağılımını noktalarla gösterir",
+    "Örneklem dağılımını teorik bir dağılımla karşılaştırır",
+    "İki değişken arasındaki ilişkinin farklı koşullu kantillerini gösterir",
+    "Grafiğe gözlemlere bağlı metin veya etiket ekler",
+    "İki nicel değişken arasındaki ilişkiyi gösterir",
+    "Sıralı veya zamansal değişimi gösterir",
+    "Kategorilerdeki gözlem sayılarını gösterir",
+    "Önceden hesaplanmış değerleri sütunlarla gösterir",
+    "Nicel bir değişkenin dağılımını gösterir",
+    "Nicel bir değişkenin dağılım biçimini gösterir",
+    "Nicel bir değişkenin dağılımını özetler ve grupları karşılaştırır",
+    "Dağılımın biçimini ve yoğunluğunu gösterir",
+    "Özellikle kategoriler içindeki bireysel gözlemleri gösterir",
+    "Değişkenler arasındaki genel eğilimi gösterir",
+    "Değerleri iki boyutlu hücrelerin dolgu rengiyle gösterir"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(geoms, align = c("l", "l", "l"))
+```
+
+# Veri Türü, Soru ve Geometri Seçimi
+
+Grafik seçimi yalnızca veri türüne bağlı değildir. **Araştırma sorusu** da hangi geometrinin uygun olduğunu belirler.
+
+```{r selection-table, echo=FALSE}
+secim <- data.frame(
+  `Veri Yapısı` = c(
+    "1 nicel değişken",
+    "1 kategorik değişken",
+    "Kategorik + hesaplanmış nicel değer",
+    "Nicel + kategorik",
+    "2 nicel değişken",
+    "Sıralı/zamansal x + nicel y",
+    "2 nicel değişken (çok sayıda gözlem)",
+    "2 boyut + hücre değeri"
+  ),
+  
+  `Örnek Soru` = c(
+    "Dağılım nasıl?",
+    "Her kategoride kaç gözlem var?",
+    "Kategorilere ait değerler nasıl karşılaştırılır?",
+    "Dağılım gruplara göre değişiyor mu?",
+    "İki değişken arasında nasıl bir ilişki var?",
+    "Değer x boyunca nasıl değişiyor?",
+    "Gözlemler hangi bölgelerde yoğunlaşıyor?",
+    "Değerler iki boyutlu yapıda nasıl değişiyor?"
+  ),
+  
+  `Uygun Geom Örnekleri` = c(
+    "geom_histogram(), geom_density(), geom_dotplot(), geom_boxplot(), geom_violin()",
+    "geom_bar()",
+    "geom_col()",
+    "geom_boxplot(), geom_violin(), geom_jitter()",
+    "geom_point(), geom_smooth(), geom_quantile()",
+    "geom_line(), geom_area()",
+    "geom_bin_2d(), geom_hex()",
+    "geom_tile()"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(secim, align = c("l", "l", "l"))
+```
+
+> **Aynı veri türü için birden fazla grafik kullanılabilir. Seçimi araştırma sorusu belirler.**
+
+# Uygulama Verisini Hazırlayalım
+
+Bu bölümde `mtcars` veri setini kullanacağız.
+
+```{r mtcars-degiskenler, echo=FALSE}
+
+mtcars_degiskenler <- data.frame(
+  
+  Degisken = c(
+    "mpg", "cyl", "disp", "hp", "drat",
+    "wt", "qsec", "vs", "am", "gear", "carb"
+  ),
+  
+  Tur = c(
+    "Nicel - Sürekli",
+    "Nicel - Kesikli / Kategorik kullanılabilir",
+    "Nicel - Sürekli",
+    "Nicel - Sürekli",
+    "Nicel - Sürekli",
+    "Nicel - Sürekli",
+    "Nicel - Sürekli",
+    "Kategorik - İkili",
+    "Kategorik - İkili",
+    "Nicel - Kesikli / Kategorik kullanılabilir",
+    "Nicel - Kesikli"
+  ),
+  
+  Aciklama = c(
+    "Yakıt verimliliği (mil/galon)",
+    "Silindir sayısı",
+    "Motor hacmi (inç küp)",
+    "Motor gücü (hp)",
+    "Arka aks oranı",
+    "Araç ağırlığı (1000 lb)",
+    "Çeyrek mil süresi (saniye)",
+    "Motor tipi (0 = V tipi, 1 = düz/sıralı)",
+    "Şanzıman türü (0 = otomatik, 1 = manuel)",
+    "İleri vites sayısı",
+    "Karbüratör sayısı"
+  )
+)
+
+knitr::kable(
+  mtcars_degiskenler,
+  col.names = c(
+    "Değişken",
+    "Değişken Türü",
+    "Açıklama"
+  ),
+  align = c("l", "l", "l")
+)
+```
+
+```{r packages}
+library(ggplot2)
+```
+
+```{r inspect-data}
+head(mtcars)
+dim(mtcars)
+names(mtcars)
+str(mtcars)
+summary(mtcars)
+```
+
+Çalışmayı daha anlaşılır hale getirmek için veri setinin bir kopyasını oluşturalım.
+
+```{r prepare-data}
+df <- mtcars
+
+df$vs <- factor (df$vs,
+                 levels = c (0, 1),
+                 labels = c("V tipi", "düz/sıralı"))
+
+df$am <- factor(
+  df$am,
+  levels = c(0, 1),
+  labels = c("Otomatik", "Manuel")
+)
+
+str(df)
+```
+
+# Tek Sürekli Değişkenin Dağılımı
+
+## Histogram
+
+**Soru:** `mpg` değerleri hangi aralıklarda yoğunlaşıyor?
+
+```{r histogram}
+ggplot(df, aes(x = mpg)) +
+  geom_histogram(
+    binwidth = 2,
+    fill = "steelblue",
+    color = "white"
+  ) +
+  labs(
+    title = "Yakıt Verimliliğinin Dağılımı",
+    x = "Yakıt Verimliliği (mpg)",
+    y = "Frekans"
+  ) +
+  theme_minimal()
+```
+### Yorum:
+
+`mpg` değişkenine ait histogram incelendiğinde, gözlemlerin büyük bölümünün yaklaşık **15–23 mpg aralığında yoğunlaştığı**, daha yüksek `mpg` değerlerinde ise gözlem sıklığının azaldığı görülmektedir. Dağılımın üst değerlere doğru uzaması (yani dağılımın kuyrupunun sağa doğru uzun olması), dağılımın **pozitif (sağa) çarpıklık** olduğunu düşündürmektedir. Çarpıklık değeri kontrol edilerek yorum yapılabilir.
+
+Çarpıklık (skewness) katsayısı, dağılımın simetriden sapma yönü ve derecesi hakkında bilgi verir. Katsayının 0 olması dağılımın yaklaşık simetrik, pozitif olması sağa çarpık, negatif olması ise sola çarpık olduğunu gösterir. Uygulamada mutlak çarpıklık değerinin |skewness| < 0.5 olması yaklaşık simetrik, 0.5 ≤ |skewness| < 1 olması orta düzeyde çarpık ve |skewness| ≥ 1 olması belirgin/yüksek düzeyde çarpık bir dağılım olarak yorumlanabilir. Bu eşikler betimsel değerlendirmede kullanılan pratik ölçütlerdir.
+
+```{r install-moments, eval=FALSE}
+# Paket yalnızca ilk kullanımda kurulur
+install.packages("moments")
+```
+
+```{r package}
+library(moments)
+```
+
+```{r skewness-mpg}
+skewness(df$mpg)
+```
+
+`mpg` değişkeninin çarpıklık katsayısı 0.64 olarak hesaplanmıştır. Katsayının pozitif olması 0.5'ten büyük olması dağılımın sağa çarpık olduğunu göstermektedir.
+
+
+## Yoğunluk Grafiği
+
+Veri ve mapping aynı kalırken yalnızca geometriyi değiştirebiliriz.
+
+```{r density}
+ggplot(df, aes(x = mpg)) +
+  geom_density(
+    fill = "lightblue",
+    alpha = 0.5
+  ) +
+  labs(
+    title = "Yakıt Verimliliğinin Yoğunluk Grafiği",
+    x = "Yakıt Verimliliği (mpg)",
+    y = "Yoğunluk"
+  ) +
+  theme_minimal()
+```
+
+> **Veri aynı + mapping aynı + farklı geom = veriye farklı bir bakış açısı.**
+
+# Kategorik Veri
+
+## `geom_bar()`
+
+**Soru:** Her silindir grubunda kaç araç var?
+
+```{r bar}
+ggplot(df, aes(x = cyl)) +
+  geom_bar(fill = "steelblue") +
+  labs(
+    title = "Silindir Sayısına Göre Araç Sayısı",
+    x = "Silindir Sayısı",
+    y = "Araç Sayısı"
+  ) +
+  theme_minimal()
+```
+
+`geom_bar()` gözlem sayılarını kendisi hesaplar. Bu nedenle `aes()` içerisinde ayrıca bir `y` değişkeni belirtmek zorunda değiliz.
+
+# Sürekli Veriyi Gruplara Göre Karşılaştırma
+
+## Boxplot
+
+```{r boxplot}
+ggplot(df, aes(x = cyl, y = mpg)) +
+  geom_boxplot(fill = "skyblue") +
+  labs(
+    title = "Silindir Gruplarına Göre Yakıt Verimliliği",
+    x = "Silindir Sayısı",
+    y = "Yakıt Verimliliği (mpg)"
+  ) +
+  theme_minimal()
+```
+
+Burada `cyl` grupları oluşturan kategorik değişken, `mpg` ise dağılımını karşılaştırdığımız sürekli değişkendir.
+
+## Violin Plot
+
+```{r violin}
+ggplot(df, aes(x = cyl, y = mpg)) +
+  geom_violin(fill = "plum", alpha = 0.5) +
+  labs(
+    title = "Silindir Gruplarına Göre mpg Dağılımı",
+    x = "Silindir Sayısı",
+    y = "Yakıt Verimliliği (mpg)"
+  ) +
+  theme_minimal()
+```
+
+## Jitter
+
+```{r jitter}
+ggplot(df, aes(x = cyl, y = mpg)) +
+  geom_jitter(width = 0.15, size = 2, alpha = 0.7) +
+  labs(
+    title = "Silindir Gruplarındaki Bireysel Gözlemler",
+    x = "Silindir Sayısı",
+    y = "Yakıt Verimliliği (mpg)"
+  ) +
+  theme_minimal()
+```
+
+# Katmanlar (Layers)
+
+`ggplot2` grafiklerinde birden fazla geometri aynı grafik üzerine katmanlar halinde eklenebilir.
+
+## Violin + Boxplot
+
+```{r violin-boxplot}
+ggplot(df, aes(x = cyl, y = mpg)) +
+  geom_violin(fill = "lightblue", alpha = 0.5) +
+  geom_boxplot(width = 0.15, fill = "white") +
+  labs(
+    title = "Silindir Gruplarına Göre mpg Dağılımı",
+    x = "Silindir Sayısı",
+    y = "Yakıt Verimliliği (mpg)"
+  ) +
+  theme_minimal()
+```
+
+Bu grafikte iki geometri farklı bilgiler sağlar:
+
+- `geom_violin()` dağılımın biçimini,
+- `geom_boxplot()` medyan ve çeyrekleri gösterir.
+
+## Boxplot + Jitter
+
+```{r boxplot-jitter}
+ggplot(df, aes(x = cyl, y = mpg)) +
+  geom_boxplot(fill = "lightblue", alpha = 0.5) +
+  geom_jitter(width = 0.15, size = 2, alpha = 0.7) +
+  labs(
+    title = "Özet Dağılım ve Bireysel Gözlemler",
+    x = "Silindir Sayısı",
+    y = "Yakıt Verimliliği (mpg)"
+  ) +
+  theme_minimal()
+```
+
+# Ölçekler (Scales)
+
+**Mapping**, hangi değişkenin hangi görsel özellikle temsil edileceğini belirler. **Scale (ölçek)** ise bu değişkenin değerlerinin görsel olarak nasıl gösterileceğini belirler.
+
+> **Mapping görsel rolü, scale görsel karşılığı belirler.**
+
+Örneğin `hp` değişkenini renge eşleyelim:
+
+```{r scale-default}
+ggplot(df, aes(x = disp, y = mpg, color = hp)) +
+  geom_point(size = 3, alpha = 0.7)
+```
+
+Burada `color = hp` bir **mapping** işlemidir. Renklerin hangi ölçekle gösterileceğini ayrıca belirleyebiliriz.
+
+```{r scale-color}
+ggplot(df, aes(x = disp, y = mpg, color = hp)) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_viridis_c()
+```
+
+Scale yalnızca renk için kullanılmaz. X ve Y konumları da görsel özelliklerdir ve kendi ölçeklerine sahiptir.
+
+```{r scale-examples, eval=FALSE}
+scale_color_viridis_c()
+scale_x_continuous()
+scale_y_continuous()
+```
+
+# Etiketler (Labels)
+
+Grafiğin başlığı, alt başlığı, eksen adları ve gösterge başlıkları `labs()` ile düzenlenebilir.
+
+```{r labels}
+ggplot(df, aes(x = disp, y = mpg, color = hp)) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_viridis_c() +
+  labs(
+    title = "Motor Hacmi ve Yakıt Verimliliği",
+    subtitle = "Motor gücü renk ile gösterilmiştir",
+    x = "Motor Hacmi",
+    y = "Yakıt Verimliliği (mpg)",
+    color = "Motor Gücü (hp)"
+  )
+```
+
+# Tema (Theme)
+
+`theme_*()` fonksiyonları veriyi veya mapping'i değiştirmez. Grafiğin görsel sunumunu düzenler.
+
+```{r theme-example}
+ggplot(df, aes(x = disp, y = mpg, color = hp)) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_viridis_c() +
+  labs(
+    title = "Motor Hacmi ve Yakıt Verimliliği",
+    x = "Motor Hacmi",
+    y = "Yakıt Verimliliği (mpg)",
+    color = "Motor Gücü (hp)"
+  ) +
+  theme_minimal()
+```
+
+# Tam Bir ggplot Grafiğini Parçalayalım
+
+```{r complete-plot}
+ggplot(
+  data = df,
+  aes(x = disp, y = mpg, color = hp)
+) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_viridis_c() +
+  labs(
+    title = "Motor Hacmi ve Yakıt Verimliliği",
+    subtitle = "Motor gücü renk ile gösterilmiştir",
+    x = "Motor Hacmi",
+    y = "Yakıt Verimliliği (mpg)",
+    color = "Motor Gücü (hp)"
+  ) +
+  theme_minimal()
+```
+
+Bu kodu Grafiklerin Grameri açısından parçalarsak:
+
+```{r complete-table, echo=FALSE}
+tam_grafik <- data.frame(
+  Bileşen = c("Veri", "Mapping", "Mapping", "Mapping", "Geometri / Katman", "Scale", "Labels", "Theme"),
+  Kod = c("df", "x = disp", "y = mpg", "color = hp", "geom_point()", "scale_color_viridis_c()", "labs()", "theme_minimal()"),
+  Görevi = c(
+    "Hangi veri kullanılacak?",
+    "Motor hacmi → x konumu",
+    "Yakıt verimliliği → y konumu",
+    "Motor gücü → renk",
+    "Gözlemler noktalarla çizilir",
+    "hp değerlerinin renk karşılığı belirlenir",
+    "Başlık, eksen ve gösterge etiketleri düzenlenir",
+    "Grafiğin görsel sunumu düzenlenir"
+  )
+)
+
+knitr::kable(tam_grafik, align = c("l", "l", "l"))
+```
+
+> **Hatırla:** Data → Mapping → Geom/Layers → Scales → Labels → Theme
+
+# Peki Veri Grafiğe Hazır Değilse?
+
+Görselleştirmeden önce bazen verinin türünü değiştirmemiz veya özet değerler üretmemiz gerekir.
+
+## Sayısal Değişkeni Grup Olarak Kullanmak
+
+`cyl` değişkeni sayısal değerlerden oluşsa da 4, 6 ve 8 silindirli araçları ayrı gruplar olarak ele almak isteyebiliriz.
+
+```{r factor-example, eval=FALSE}
+df$cyl <- factor(df$cyl)
+```
+
+## Kategori Etiketlerini Düzenlemek
+
+```{r label-factor, eval=FALSE}
+df$am <- factor(
+  df$am,
+  levels = c(0, 1),
+  labels = c("Otomatik", "Manuel")
+)
+```
+
+## Özet Veri Üretmek: `geom_bar()` ve `geom_col()`
+
+Önce silindir gruplarına göre ortalama `mpg` değerlerini hesaplayalım.
+
+```{r aggregate-example}
+ortalama_mpg <- aggregate(
+  mpg ~ cyl,
+  data = df,
+  FUN = mean
+)
+
+ortalama_mpg
+```
+
+Artık elimizde hesaplanmış bir `y` değeri vardır. Bu nedenle `geom_col()` kullanabiliriz.
+
+```{r col-example}
+ggplot(ortalama_mpg, aes(x = cyl, y = mpg)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Silindir Gruplarına Göre Ortalama mpg",
+    x = "Silindir Sayısı",
+    y = "Ortalama mpg"
+  ) +
+  theme_minimal()
+```
+
+> **`geom_bar()` gözlemleri sayar; `geom_col()` verilen y değerini çizer.**
+
+# Kısa Özet
+
+Bu haftanın temel düşünce zinciri şöyledir:
+
+> **Araştırma sorusu → Veri türü → Mapping → Geom → Layers → Scale → Labels → Theme**
+
+Bir grafiği oluştururken yalnızca “hangi grafik türünü kullanmalıyım?” sorusunu değil, aşağıdaki soruları da düşünmeliyiz:
+
+- Hangi veriyi kullanıyorum?
+- Değişkenlerimin türleri nedir?
+- Hangi değişkeni hangi görsel özellikle göstereceğim?
+- Hangi geometri araştırma soruma uygun?
+- Birden fazla katmana ihtiyacım var mı?
+- Ölçekler değerleri uygun biçimde gösteriyor mu?
+- Başlık ve eksen etiketleri anlaşılır mı?
+- Tema, grafiğin okunabilirliğini destekliyor mu?
+
