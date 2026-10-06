@@ -245,6 +245,88 @@ ggplot(df, aes(x = factor(cyl))) +
 
 
 # ------------------------------------------------------------
+# İKİ KATEGORİK DEĞİŞKENİN BİRLİKTE GÖSTERİMİ
+# ------------------------------------------------------------
+
+# mtcars veri setinde:
+# cyl = silindir sayısı
+# am  = şanzıman türü
+#       0 = Otomatik
+#       1 = Manuel
+#
+# cyl ve am veri setinde sayısal olarak saklanmaktadır.
+# Ancak burada bu değişkenleri kategorik olarak kullanacağımız
+# için factor türüne dönüştürüyoruz.
+
+mtcars$cyl <- factor(mtcars$cyl)
+
+mtcars$am <- factor(
+  mtcars$am,
+  levels = c(0, 1),
+  labels = c("Otomatik", "Manuel")
+)
+
+
+# ------------------------------------------------------------
+# 1. STACKED BAR PLOT - Üst Üste Sütunlar
+# ------------------------------------------------------------
+
+# x = cyl:
+# Araçları silindir sayısına göre gruplandırır.
+#
+# fill = am:
+# Her silindir grubunu şanzıman türüne göre
+# Otomatik ve Manuel olarak ayırır.
+#
+# geom_bar() her gruptaki araç sayısını otomatik olarak hesaplar.
+#
+# geom_bar() için varsayılan position = "stack"tir.
+# Bu nedenle Otomatik ve Manuel araçlar aynı sütun içinde
+# üst üste gösterilir.
+
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar()
+
+
+# ------------------------------------------------------------
+# 2. DODGED BAR PLOT - Yan Yana Sütunlar
+# ------------------------------------------------------------
+
+# position = "dodge":
+# Otomatik ve Manuel araçları üst üste göstermek yerine
+# yan yana sütunlar halinde gösterir.
+#
+# Böylece her silindir grubunda Otomatik ve Manuel
+# araç SAYILARINI karşılaştırmak daha kolay hale gelir.
+#
+# fill = am              -> Neye göre gruplandıracağımızı belirler.
+# position = "dodge"     -> Grupların nasıl yerleşeceğini belirler.
+
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "dodge")
+
+
+# ------------------------------------------------------------
+# 3. FILLED BAR PLOT - Oransal Sütunlar
+# ------------------------------------------------------------
+
+# position = "fill":
+# Her silindir grubunun toplam sütun yüksekliğini 1'e (%100'e)
+# eşitler.
+#
+# Bu nedenle burada araç sayılarını değil,
+# her silindir grubu içindeki Otomatik ve Manuel
+# araçların ORANLARINI karşılaştırırız.
+#
+# Y ekseninde:
+# 0.00 = %0
+# 0.50 = %50
+# 1.00 = %100
+
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "fill")
+
+# ------------------------------------------------------------
 # Frekansların Grafik Üzerinde Gösterilmesi
 # ------------------------------------------------------------
 
@@ -270,6 +352,15 @@ ggplot(df, aes(x = factor(cyl))) +
     y = "Araç Sayısı"
   ) +
   theme_minimal()
+
+
+ggplot(mtcars, aes(x = factor(cyl))) +
+  geom_bar(fill = "steelblue") +
+  geom_text(
+    aes(label = after_stat(count)),
+    stat = "count",
+    vjust = -0.5
+  )
 
 
 # ============================================================
