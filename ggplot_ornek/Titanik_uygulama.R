@@ -15,7 +15,7 @@ library(ggplot2)
 # 2. VERİ SETİNİN OKUNMASI
 # ============================================================
 
-titanic <- read.csv("titanic.csv")
+titanic =  read.csv("titanik_veriseti.csv")
 
 
 # ============================================================
@@ -55,18 +55,18 @@ summary(titanic)
 # Veri setindeki bazı İngilizce değişken adlarını
 # daha anlaşılır Türkçe isimlerle değiştirelim.
 
-colnames(titanic)[colnames(titanic) == "PassengerId"] <- "Yolcu_No"
-colnames(titanic)[colnames(titanic) == "Survived"]    <- "Hayatta_Kalma"
-colnames(titanic)[colnames(titanic) == "Pclass"]      <- "Yolcu_Sinifi"
-colnames(titanic)[colnames(titanic) == "Name"]        <- "Isim"
-colnames(titanic)[colnames(titanic) == "Sex"]         <- "Cinsiyet"
-colnames(titanic)[colnames(titanic) == "Age"]         <- "Yas"
-colnames(titanic)[colnames(titanic) == "SibSp"]       <- "Kardes_Es"
-colnames(titanic)[colnames(titanic) == "Parch"]       <- "Ebeveyn_Cocuk"
-colnames(titanic)[colnames(titanic) == "Ticket"]      <- "Bilet_No"
-colnames(titanic)[colnames(titanic) == "Fare"]        <- "Bilet_Ucreti"
-colnames(titanic)[colnames(titanic) == "Cabin"]       <- "Kabin"
-colnames(titanic)[colnames(titanic) == "Embarked"]    <- "Binis_Limani"
+colnames(titanic)[colnames(titanic) == "PassengerId"] = "Yolcu_No"
+colnames(titanic)[colnames(titanic) == "Survived"]    = "Hayatta_Kalma"
+colnames(titanic)[colnames(titanic) == "Pclass"]      = "Yolcu_Sinifi"
+colnames(titanic)[colnames(titanic) == "Name"]        = "Isim"
+colnames(titanic)[colnames(titanic) == "Sex"]         = "Cinsiyet"
+colnames(titanic)[colnames(titanic) == "Age"]         = "Yas"
+colnames(titanic)[colnames(titanic) == "SibSp"]       = "Kardes_Es"
+colnames(titanic)[colnames(titanic) == "Parch"]       = "Ebeveyn_Cocuk"
+colnames(titanic)[colnames(titanic) == "Ticket"]      = "Bilet_No"
+colnames(titanic)[colnames(titanic) == "Fare"]        = "Bilet_Ucreti"
+colnames(titanic)[colnames(titanic) == "Cabin"]       = "Kabin"
+colnames(titanic)[colnames(titanic) == "Embarked"]    = "Binis_Limani"
 
 
 # Yeni değişken isimlerini kontrol edelim.
@@ -178,7 +178,7 @@ sum(complete.cases(titanic))
 # Hayatta kalma durumu
 # ------------------------------------------------------------
 
-titanic$Hayatta_Kalma <- factor(
+titanic$Hayatta_Kalma = factor(
   titanic$Hayatta_Kalma,
   levels = c(0, 1),
   labels = c(
@@ -192,7 +192,7 @@ titanic$Hayatta_Kalma <- factor(
 # Yolcu sınıfı
 # ------------------------------------------------------------
 
-titanic$Yolcu_Sinifi <- factor(
+titanic$Yolcu_Sinifi = factor(
   titanic$Yolcu_Sinifi,
   levels = c(1, 2, 3),
   labels = c(
@@ -207,7 +207,7 @@ titanic$Yolcu_Sinifi <- factor(
 # Cinsiyet
 # ------------------------------------------------------------
 
-titanic$Cinsiyet <- factor(
+titanic$Cinsiyet = factor(
   titanic$Cinsiyet,
   levels = c("female", "male"),
   labels = c("Kadın", "Erkek")
@@ -218,7 +218,7 @@ titanic$Cinsiyet <- factor(
 # Biniş limanı
 # ------------------------------------------------------------
 
-titanic$Binis_Limani <- factor(
+titanic$Binis_Limani = factor(
   titanic$Binis_Limani,
   levels = c("C", "Q", "S"),
   labels = c(
@@ -276,7 +276,7 @@ summary(titanic$Yas)
 # Yaş için özet tablo
 # ------------------------------------------------------------
 
-yas_ozet <- data.frame(
+yas_ozet = data.frame(
   Ortalama = mean(titanic$Yas, na.rm = TRUE),
   Medyan = median(titanic$Yas, na.rm = TRUE),
   Standart_Sapma = sd(titanic$Yas, na.rm = TRUE),
@@ -393,9 +393,10 @@ ggplot(
   aes(x = Yas)
 ) +
   geom_histogram(
-    bins = 20,
+    bins = 15,
     fill = "steelblue",
-    color = "white"
+    color = "white", 
+    na.rm = TRUE
   ) +
   labs(
     title = "Titanic Yolcularının Yaş Dağılımı",
@@ -458,10 +459,11 @@ ggplot(
 
 ggplot(
   titanic,
-  aes(x = Hayatta_Kalma)
+  aes(x = Hayatta_Kalma, color = Hayatta_Kalma, 
+      fill = Hayatta_Kalma)
 ) +
   geom_bar(
-    fill = "steelblue"
+    #fill = "steelblue"
   ) +
   geom_text(
     stat = "count",
@@ -475,6 +477,41 @@ ggplot(
   ) +
   theme_minimal()
 
+#geom_bar()  Kişileri sayar.
+#after_stat()  Hesaplanan sayılara erişmemizi sağlar.
+#geom_text()  Hesapladığımız yüzdeleri grafiğe yazar.
+
+#count	Kategorideki kişi sayısı
+#sum(count)	Toplam kişi sayısı
+#* 100	Yüzde hesaplama
+#round(..., 1)	Bir ondalık basamağa yuvarlama
+#paste0(..., "%")	Yüzde işaretini ekleme
+
+
+ggplot(
+  titanic,
+  aes(
+    x = Hayatta_Kalma,
+    color = Hayatta_Kalma,
+    fill = Hayatta_Kalma
+  )
+) +
+  geom_bar() +
+  geom_text(
+    stat = "count",
+    aes(
+      label = after_stat(
+        paste0(round(count / sum(count) * 100, 1), "%")
+      )
+    ),
+    vjust = -0.5
+  ) +
+  labs(
+    title = "Titanic Yolcularının Hayatta Kalma Durumu",
+    x = "Hayatta Kalma Durumu",
+    y = "Yolcu Sayısı"
+  ) +
+  theme_minimal()
 
 # ------------------------------------------------------------
 # 11.2. Yolcu sınıfı
@@ -523,15 +560,332 @@ ggplot(
   ) +
   theme_minimal()
 
+#Birlikte yüzdeleri hesaplayalım
+
+ggplot(
+  titanic,
+  aes(
+    x = Cinsiyet,
+    color = Cinsiyet,
+    fill = Cinsiyet
+  )
+) +
+  geom_bar() +
+  geom_text(
+    stat = "count",
+    aes(
+      label = after_stat(
+        paste0(round(count / sum(count) * 100, 1), "%")
+      )
+    ),
+    vjust = -0.5
+  ) +
+  labs(
+    title = "Cinsiyete göre yolcu dağılımı",
+    x = "Cinsiyet",
+    y = "Yolcu Sayısı"
+  ) +
+  theme_minimal()
 
 # ============================================================
-# 12. İKİ KATEGORİK DEĞİŞKENİN İNCELENMESİ
+# CİNSİYETE GÖRE HAYATTA KALMA ORANLARININ GÖRSELLEŞTİRİLMESİ
 # ============================================================
+
+# ARAŞTIRMA SORUSU:
+# Titanic'te cinsiyete göre yolcuların hayatta kalma
+# oranları nedir?
+
+# ------------------------------------------------------------
+# 1. GRAFİĞİN OLUŞTURULMASI
+# ------------------------------------------------------------
+
+ggplot(
+  titanic,
+  
+  aes(
+    # X ekseninde cinsiyet kategorileri yer alacaktır.
+    # Kadın ve erkek yolcular ayrı sütunlarla gösterilecektir.
+    x = Cinsiyet,
+    
+    # Hayatta kalma durumuna göre sütunların içi renklendirilir.
+    # Böylece hayatta kalanlar ve kalmayanlar ayırt edilir.
+    fill = Hayatta_Kalma
+  )
+  
+) +
+  
+  # ----------------------------------------------------------
+# 2. SÜTUN GRAFİĞİ
+# ----------------------------------------------------------
+
+geom_bar(
+  # geom_bar() her kategorideki gözlem sayısını
+  # otomatik olarak hesaplar.
+  
+  # position = "fill":
+  # Her cinsiyet grubunun toplamını 1 (%100) kabul eder.
+  #
+  # Böylece kadın ve erkek yolcuların sayıları yerine,
+  # her cinsiyet içerisindeki hayatta kalma oranları
+  # karşılaştırılabilir.
+  #
+  # Örneğin:
+  # Kadınların %74,2'si hayatta kalmıştır.
+  # Erkeklerin %18,9'u hayatta kalmıştır.
+  
+  position = "fill"
+) +
+  
+  
+  # ----------------------------------------------------------
+# 3. SÜTUNLARIN İÇİNE YÜZDELERİN YAZDIRILMASI
+# ----------------------------------------------------------
+
+geom_text(
+  
+  # geom_text() grafiğin üzerine yazı eklememizi sağlar.
+  
+  # stat = "count":
+  # R, her kategoride kaç gözlem olduğunu hesaplar.
+  #
+  # Örneğin:
+  # Hayatta kalan kadın sayısı = 233
+  # Hayatta kalmayan kadın sayısı = 81
+  #
+  # Hayatta kalan erkek sayısı = 109
+  # Hayatta kalmayan erkek sayısı = 468
+  
+  stat = "count",
+  
+  aes(
+    
+    # label:
+    # Grafiğin üzerinde hangi bilginin yazılacağını belirtir.
+    
+    # after_stat():
+    # R, gözlem sayılarını hesapladıktan sonra
+    # bu sayıları kullanarak yeni hesaplamalar yapmamızı sağlar.
+    
+    label = after_stat(
+      
+      # paste0():
+      # Birden fazla ifadeyi birleştirir.
+      # Burada hesaplanan sayının sonuna "%" işareti ekler.
+      #
+      # Örneğin:
+      # paste0(74.2, "%")
+      # Sonuç: "74.2%"
+      
+      paste0(
+        
+        # round():
+        # Hesaplanan yüzdeleri yuvarlar.
+        #
+        # İkinci parametre olan 1,
+        # virgülden sonra bir basamak gösterileceğini belirtir.
+        
+        round(
+          
+          # ------------------------------------------------
+          # YÜZDE HESAPLAMA
+          # ------------------------------------------------
+          
+          # Yüzde hesaplama formülü:
+          #
+          # İlgili gruptaki kişi sayısı
+          # ---------------------------------- x 100
+          # Aynı cinsiyetteki toplam kişi sayısı
+          
+          count / ave(count, x, FUN = sum) * 100,
+          
+          1
+        ),
+        
+        "%"
+      )
+    )
+  ),
+  
+  # --------------------------------------------------------
+  # 4. YAZILARIN KONUMLANDIRILMASI
+  # --------------------------------------------------------
+  
+  # position_fill(vjust = 0.5):
+  # Yüzdeleri her renkli bölümün ortasına yerleştirir.
+  #
+  # vjust = 0.5 -> Ortada
+  #
+  # Buradaki 0.5 bir ortalama değildir.
+  # Yazının konumunu belirler.
+  
+  position = position_fill(vjust = 0.5),
+  
+  # Yazı rengini beyaz yapar.
+  color = "white",
+  
+  # Yazı büyüklüğünü belirler.
+  size = 5
+  
+) +
+  
+  
+# ----------------------------------------------------------
+# 5. Y EKSENİNİN YÜZDE OLARAK GÖSTERİLMESİ
+# ----------------------------------------------------------
+
+scale_y_continuous(
+  
+  # position = "fill" kullanıldığında
+  # Y eksenindeki değerler 0 ile 1 arasındadır.
+  #
+  # 0    -> %0
+  # 0.25 -> %25
+  # 0.50 -> %50
+  # 0.75 -> %75
+  # 1    -> %100
+  #
+  # scales::label_percent() bu değerleri
+  # yüzde biçiminde göstermemizi sağlar.
+  #
+  # Bu işlem veriyi değiştirmez.
+  # Yalnızca eksen etiketlerinin görünümünü değiştirir.
+  
+  labels = scales::label_percent()
+  
+) +
+  
+  
+# ----------------------------------------------------------
+# 6. GRAFİK BAŞLIKLARI
+# ----------------------------------------------------------
+
+labs(
+  title = "Cinsiyete Göre Hayatta Kalma Oranları",
+  
+  subtitle = "Kadın ve erkek yolcuların grup içi yüzdeleri",
+  
+  x = "Cinsiyet",
+  
+  y = "Oran (%)",
+  
+  fill = "Hayatta Kalma Durumu",
+  
+  caption = "Veri: Titanic"
+) +
+  
+  
+  # ----------------------------------------------------------
+# 7. GRAFİK TEMASI
+# ----------------------------------------------------------
+
+# theme_minimal():
+# Gereksiz arka plan öğelerini azaltarak
+# sade ve okunabilir bir grafik oluşturur.
+
+theme_minimal()
+
+
+# ============================================================
+# EK AÇIKLAMA: ave() FONKSİYONU
+# ============================================================
+
+# ave() fonksiyonu, verileri belirli gruplara ayırarak
+# her grup için ayrı hesaplama yapmamızı sağlar.
+#
+# Genel kullanımı:
+#
+# ave(degerler, gruplar, FUN = islem)
+#
+# degerler : Üzerinde işlem yapılacak sayılar
+# gruplar  : Hangi gruba ait olduklarını gösteren değişken
+# FUN      : Yapılacak işlem (sum, mean vb.)
 
 
 # ------------------------------------------------------------
-# 12.1. CİNSİYET x HAYATTA KALMA
+# BASİT BİR ÖRNEK
 # ------------------------------------------------------------
+
+# Dört öğrencinin notları
+notlar = c(60, 70, 80, 90)
+
+# Öğrencilerin sınıfları
+sinif = c("A", "A", "B", "B")
+
+# Her sınıfın toplam notunu hesaplayalım.
+
+ave(notlar, sinif, FUN = sum)
+
+# SONUÇ:
+# 130 130 170 170
+#
+# A sınıfı:
+# 60 + 70 = 130
+#
+# B sınıfı:
+# 80 + 90 = 170
+#
+# ave(), her öğrencinin karşısına
+# ait olduğu sınıfın toplamını yazar.
+
+
+# ------------------------------------------------------------
+# TITANIC GRAFİĞİNDE ave() NE YAPIYOR?
+# ------------------------------------------------------------
+
+# ave(count, x, FUN = sum)
+#
+# count:
+# Her cinsiyet ve hayatta kalma kategorisindeki kişi sayısı.
+#
+# x:
+# Grafikteki cinsiyet kategorisini temsil eder.
+#
+# FUN = sum:
+# Aynı cinsiyete ait kişi sayılarını toplar.
+#
+# Kadın:
+# 81 + 233 = 314
+#
+# Erkek:
+# 468 + 109 = 577
+#
+# Böylece her kategorinin yüzdesi,
+# kendi cinsiyet grubunun toplamına göre hesaplanır.
+
+
+# ------------------------------------------------------------
+# YÜZDE HESAPLAMA ÖRNEKLERİ
+# ------------------------------------------------------------
+
+# Hayatta kalan kadınların yüzdesi
+233 / 314 * 100
+# %74,2
+
+# Hayatta kalmayan kadınların yüzdesi
+81 / 314 * 100
+# %25,8
+
+# Hayatta kalan erkeklerin yüzdesi
+109 / 577 * 100
+# %18,9
+
+# Hayatta kalmayan erkeklerin yüzdesi
+468 / 577 * 100
+# %81,1
+
+
+# ============================================================
+# GRAFİĞİN YORUMLANMASI
+# ============================================================
+
+# Kadın yolcuların %74,2'si hayatta kalırken,
+# erkek yolcuların %18,9'u hayatta kalmıştır.
+#
+# Kadınlarda hayatta kalma oranı erkeklerden daha yüksektir.
+#
+
+
+
 
 # Çapraz tablo
 table(
@@ -559,64 +913,9 @@ round(
 )
 
 
-# ------------------------------------------------------------
-# Sayıları gösteren grafik
-# ------------------------------------------------------------
-
-ggplot(
-  titanic,
-  aes(
-    x = Cinsiyet,
-    fill = Hayatta_Kalma
-  )
-) +
-  geom_bar(
-    position = "dodge"
-  ) +
-  labs(
-    title = "Cinsiyete Göre Hayatta Kalma Durumu",
-    x = "Cinsiyet",
-    y = "Yolcu Sayısı",
-    fill = "Hayatta Kalma"
-  ) +
-  theme_minimal()
-
-
-# ------------------------------------------------------------
-# Oranları gösteren grafik
-# ------------------------------------------------------------
-
-ggplot(
-  titanic,
-  aes(
-    x = Cinsiyet,
-    fill = Hayatta_Kalma
-  )
-) +
-  geom_bar(
-    position = "fill"
-  ) +
-  labs(
-    title = "Cinsiyete Göre Hayatta Kalma Oranları",
-    x = "Cinsiyet",
-    y = "Oran",
-    fill = "Hayatta Kalma"
-  ) +
-  theme_minimal()
-
-
-# NOT:
-#
-# position = "dodge"
-# -> SAYILARI karşılaştırır.
-#
-# position = "fill"
-# -> Her grubun toplamını 1'e eşitler.
-# -> ORANLARI karşılaştırmayı kolaylaştırır.
-
 
 # ============================================================
-# 13. YOLCU SINIFI x HAYATTA KALMA
+# 12. YOLCU SINIFI x HAYATTA KALMA
 # ============================================================
 
 
@@ -669,6 +968,37 @@ ggplot(
     caption = "Veri: Titanic"
   ) +
   theme_minimal()
+
+#Yolcu sınıfına göre hayatta kalma oranlarının grafik üzerine yazılması
+
+ggplot(titanic, 
+       aes(
+         x = Yolcu_Sinifi,
+         fill = Hayatta_Kalma)) +
+  geom_bar(position = "fill",
+           ) +
+  geom_text(
+    stat = "count",
+    aes(label = after_stat(
+        paste0(round(count / ave(count, x, FUN = sum) * 100,1),"%"))),
+    position = position_fill(vjust = 0.5),
+    color = "white",
+    size = 5
+    
+  ) +
+scale_y_continuous(
+  
+  labels = scales::label_percent()
+  
+) +
+
+labs(
+  title = "Yolcu Sınıfına Göre Hayatta Kalma Oranları",
+  x = "Yolcu Sınıfı",
+  y = "Oran (%)",
+  fill = "Hayatta Kalma Durumu"
+) +
+theme_minimal()
 
 
 # ============================================================
@@ -836,6 +1166,47 @@ ggplot(
   ) +
   theme_minimal()
 
+
+# ============================================================
+# GRAFİĞİN YORUMLANMASI
+# ============================================================
+
+# Bu saçılım grafiğinde (scatter plot),
+# X ekseninde yolcuların yaşları,
+# Y ekseninde ise ödedikleri bilet ücretleri gösterilmektedir.
+#
+# Her nokta bir yolcuyu temsil etmektedir.
+#
+# Noktaların renkleri yolcuların hayatta kalma
+# durumlarına göre belirlenmiştir.
+#
+# Grafikte yolcuların büyük bölümünün düşük bilet
+# ücretlerinde yoğunlaştığı görülmektedir.
+#
+# Yüksek bilet ücreti ödeyen yolcular arasında
+# hayatta kalanların daha fazla olduğu dikkat çekmektedir.
+#
+# Bununla birlikte düşük bilet ücreti ödeyen yolcular
+# arasında hem hayatta kalanlar hem de kalamayanlar vardır.
+#
+# Yaş ile bilet ücreti arasında belirgin bir doğrusal
+# ilişki gözlenmemektedir.
+#
+# Ayrıca bazı yolcuların diğerlerine göre çok daha
+# yüksek bilet ücretleri ödediği görülmektedir.
+# Bu gözlemler yüksek değerli uç gözlemler olarak
+# değerlendirilebilir.
+#
+# SONUÇ:
+# Grafik, bilet ücreti ile hayatta kalma durumu
+# arasında olası bir ilişkiye işaret etmektedir.
+#
+# Ancak yalnızca bu grafikten hareketle yüksek
+# bilet ücreti ödemenin hayatta kalmayı artırdığı
+# sonucuna ulaşılamaz.
+#
+# Ayrıca noktaların üst üste gelmesi nedeniyle
+# gruplardaki yolcu sayıları doğrudan karşılaştırılamaz.
 
 # ============================================================
 # 17. TAMAMLANMIŞ BİR GRAFİK
