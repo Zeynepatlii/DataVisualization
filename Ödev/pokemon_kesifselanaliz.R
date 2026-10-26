@@ -113,7 +113,7 @@ summary(pokemon$Attack)
 
 ggplot(pokemon, aes(x = Attack, y = Defense, color = Speed)) +
   geom_point() +
-  scale_color_viridis_c() +
+  scale_color_viridis_c()+
   labs(title = "Saldırı ve Savunma İlişkisi",
        x = "Saldırı", y = "Savunma", color = "Hız") +
   theme_minimal()
@@ -167,6 +167,7 @@ ggplot(pokemon, aes(x = Attack, y = Defense, color = Speed)) +
   labs(title = "A: Sürekli Renk Ölçeği") +
   theme_minimal()
 
+#scale_color_viridis_d -> discrete değişkenler için
 # Grafik B: Legendary iki kategorili bir değişkendir.
 # factor() ile kategorik olduğunu belirtiyoruz.
 
@@ -211,6 +212,8 @@ ggplot(pokemon, aes(x = HP, y = Attack)) +
 # ============================================================
 # Güç tanımımız: Total (altı temel özelliğin toplamı).
 max(pokemon$Total)
+
+summary(pokemon$Total)
 
 # En yüksek Total değerine sahip Pokémonlar
 pokemon[pokemon$Total == max(pokemon$Total),
