@@ -1,8 +1,11 @@
 ---
 title: "VBA203 – Veri Görselleştirme"
-subtitle: "İlk 5 Hafta Genel Uygulama – iris Veri Seti (20 Soru ve Çözümleri)"
+subtitle: İlk 5 Hafta Genel Uygulama – iris Veri Seti (20 Soru ve Çözümleri)
 lang: tr
 output:
+  pdf_document:
+    toc: true
+    toc_depth: '2'
   html_document:
     toc: true
     toc_depth: 2
