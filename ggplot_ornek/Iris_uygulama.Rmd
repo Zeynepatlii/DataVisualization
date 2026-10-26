@@ -1,0 +1,356 @@
+---
+title: "VBA203 – Veri Görselleştirme"
+subtitle: "İlk 5 Hafta Genel Uygulama – iris Veri Seti (20 Soru ve Çözümleri)"
+lang: tr
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    df_print: default
+---
+
+# Veri seti ve hazırlık
+
+`iris`, üç süsen çiçeği türünden (setosa, versicolor, virginica) 50'şer gözlem içeren, toplam 150 satırlı ve 5 değişkenli hazır bir R veri setidir. `Sepal.Length` ve `Sepal.Width` çanak yaprak uzunluğu ve genişliğini; `Petal.Length` ve `Petal.Width` taç yaprak uzunluğu ve genişliğini (cm); `Species` ise çiçeğin türünü belirtir.
+
+```{r hazirlik, message=FALSE, warning=FALSE}
+library(ggplot2)
+data(iris)
+```
+
+# A – Veriyi Tanıma ve Grafik Seçimi
+
+## Soru 1 – İlk gözlemler, boyutlar ve değişken türleri
+
+```{r soru1}
+head(iris)
+dim(iris)
+nrow(iris)
+ncol(iris)
+names(iris)
+str(iris)
+```
+
+**Yorum:** Veri setinde 150 gözlem ve 5 değişken vardır. Dört ölçüm değişkeni sayısal, `Species` ise kategorik (`factor`) değişkendir.
+
+## Soru 2 – Eksik değerler ve özet istatistikler
+
+```{r soru2}
+sum(is.na(iris))
+colSums(is.na(iris))
+summary(iris$Sepal.Length)
+summary(iris$Petal.Length)
+sd(iris$Sepal.Length)
+sd(iris$Petal.Length)
+```
+
+**Yorum:** Veri setinde eksik değer yoktur. Ham standart sapmalar karşılaştırıldığında `Petal.Length` daha fazla değişkenlik gösterir. Her iki değişkenin birimi cm olduğundan bu karşılaştırma anlamlıdır; farklı ölçekli değişkenler için göreli değişkenlik de incelenebilir.
+
+# B – Tek Değişkenli Grafikler
+
+## Soru 3 – Türlerin gözlem sayıları
+
+```{r soru3, fig.width=8, fig.height=5}
+table(iris$Species)
+
+ggplot(iris, aes(x = Species, fill = Species)) +
+  geom_bar() +
+  labs(title = "Iris Türlerinin Dağılımı",
+       x = "Çiçek Türü", y = "Gözlem Sayısı", fill = "Tür") +
+  theme_minimal()
+```
+
+**Yorum:** Her türde 50 gözlem vardır. Dolayısıyla türlerin örneklem büyüklükleri eşittir.
+
+## Soru 4 – Çanak yaprak uzunluğunun histogramı
+
+```{r soru4, fig.width=8, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length)) +
+  geom_histogram(binwidth = 0.5, fill = "steelblue", color = "white") +
+  labs(title = "Çanak Yaprak Uzunluğu Dağılımı",
+       x = "Çanak Yaprak Uzunluğu (cm)", y = "Frekans") +
+  theme_minimal()
+```
+
+**Yorum:** Gözlemlerin önemli bir bölümü yaklaşık 5–7 cm aralığındadır. `binwidth = 0.5`, her histogram sütununun 0,5 cm genişliğinde olmasını sağlar.
+
+## Soru 5 – Taç yaprak uzunluğu: yoğunluk ve histogram
+
+```{r soru5, fig.width=8, fig.height=4}
+ggplot(iris, aes(x = Petal.Length)) +
+  geom_density(fill = "lightblue", color = "steelblue", alpha = 0.5) +
+  labs(title = "Taç Yaprak Uzunluğu – Yoğunluk Grafiği",
+       x = "Taç Yaprak Uzunluğu (cm)", y = "Yoğunluk") +
+  theme_minimal()
+
+ggplot(iris, aes(x = Petal.Length)) +
+  geom_histogram(binwidth = 0.5, fill = "steelblue", color = "white") +
+  labs(title = "Taç Yaprak Uzunluğu – Histogram",
+       x = "Taç Yaprak Uzunluğu (cm)", y = "Frekans") +
+  theme_minimal()
+```
+
+**Yorum:** Histogram belirli aralıklardaki gözlem sayılarını, yoğunluk grafiği ise dağılımın yumuşatılmış biçimini gösterir. Yoğunluk grafiğinin altında kalan toplam alan 1'dir; dikey eksen doğrudan gözlem sayısı değildir.
+
+# C – Estetik Eşleme, Katmanlar ve Grup Karşılaştırması
+
+## Soru 6 – Türlere göre saçılım grafiği
+
+```{r soru6, fig.width=8, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(title = "Çanak ve Taç Yaprak Uzunluğu",
+       x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)", color = "Tür") +
+  theme_minimal()
+```
+
+**Yorum:** `setosa`, kısa taç yapraklarıyla diğer türlerden belirgin biçimde ayrılır. `versicolor` ve `virginica` grupları bazı bölgelerde birbirine yaklaşır.
+
+## Soru 7 – `aes()` içinde ve dışında renk kullanımı
+
+```{r soru7, fig.width=8, fig.height=5}
+# Renk bir değişkene eşlenir:
+ggplot(iris, aes(x = Petal.Width, y = Petal.Length, color = Species)) +
+  geom_point(size = 3) +
+  labs(title = "Türlere Göre Renkler", x = "Taç Yaprak Genişliği (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+
+# Tüm noktalar aynı renkte çizilir:
+ggplot(iris, aes(x = Petal.Width, y = Petal.Length)) +
+  geom_point(size = 3, color = "steelblue") +
+  labs(title = "Tek Renkli Grafik", x = "Taç Yaprak Genişliği (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+```
+
+**Yorum:** `aes(color = Species)` türlere göre renk atar ve lejant oluşturur. `geom_point(color = "steelblue")` ise tüm noktalara sabit bir renk verir. Taç yaprak uzunluğu ve genişliği arasında genel olarak pozitif bir ilişki görülür.
+
+## Soru 8 – Türlere göre çanak yaprak genişliği
+
+```{r soru8, fig.width=8, fig.height=5}
+ggplot(iris, aes(x = Species, y = Sepal.Width, fill = Species)) +
+  geom_boxplot() +
+  labs(title = "Türlere Göre Çanak Yaprak Genişliği",
+       x = "Tür", y = "Çanak Yaprak Genişliği (cm)", fill = "Tür") +
+  theme_minimal()
+
+aggregate(Sepal.Width ~ Species, data = iris, FUN = median)
+```
+
+**Yorum:** Medyan çanak yaprak genişliği `setosa` türünde daha yüksektir. Kutunun içindeki çizgi medyanı, kutu ise birinci ve üçüncü çeyrekler arasındaki aralığı gösterir.
+
+# D – Ölçekler, Etiketler ve Temalar
+
+## Soru 9 – Sürekli renk ölçeği
+
+```{r soru9, fig.width=8, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Sepal.Width)) +
+  geom_point(size = 3) +
+  scale_color_viridis_c() +
+  labs(title = "Çanak Yaprak Genişliğine Göre Renkler",
+       x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)", color = "Genişlik (cm)") +
+  theme_minimal()
+```
+
+**Yorum:** `Sepal.Width` sayısal olduğu için sürekli bir renk geçişi kullanılır. Lejanttaki renkler, genişlik değerlerinin büyüklüğünü temsil eder.
+
+## Soru 10 – Kategorik renk ölçeği
+
+```{r soru10, fig.width=8, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_manual(values = c("setosa" = "#1B9E77",
+                                "versicolor" = "#D95F02",
+                                "virginica" = "#7570B3")) +
+  labs(title = "Türlere Göre Çanak ve Taç Yaprak Uzunluğu",
+       x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)", color = "Çiçek Türü") +
+  theme_minimal()
+```
+
+**Yorum:** `scale_color_manual()` ile üç kategoriye ayrı renkler atanmıştır. Bu, sürekli renk ölçeğinden farklı olarak sınıfları ayırt etmeyi amaçlar.
+
+## Soru 11 – Eksen işaretleri ve sınırlar
+
+```{r soru11, fig.width=8, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length)) +
+  geom_point(color = "steelblue", size = 2.5) +
+  scale_x_continuous(breaks = seq(4, 8, 0.5)) +
+  scale_y_continuous(breaks = seq(1, 7, 1)) +
+  labs(title = "Eksen İşaretleri Düzenlenmiş Grafik",
+       x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+```
+
+**Yorum:** `breaks` eksende hangi değerlerin işaretleneceğini belirler; eksen aralığını zorunlu olarak genişletmez. `limits` eksen sınırlarını belirler ve sınır dışında kalan gözlemleri çıkarabilir. Yalnızca görünüm alanını değiştirmek için `coord_cartesian()` kullanılabilir.
+
+## Soru 12 – Tema karşılaştırması
+
+```{r soru12, fig.width=8, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length)) +
+  geom_point(color = "steelblue") +
+  scale_x_continuous(breaks = seq(4, 8, 0.5)) +
+  scale_y_continuous(breaks = seq(1, 7, 1)) +
+  labs(title = "Minimal Tema", x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length)) +
+  geom_point(color = "steelblue") +
+  scale_x_continuous(breaks = seq(4, 8, 0.5)) +
+  scale_y_continuous(breaks = seq(1, 7, 1)) +
+  labs(title = "Klasik Tema", x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_classic()
+```
+
+**Örnek tercih:** `theme_minimal()` hafif kılavuz çizgileri sayesinde değerleri izlemeyi kolaylaştırır. `theme_classic()` daha sade bir arka plan sunar. İki grafikteki veri değişmez.
+
+# E – Çok Panelli Grafikler (Faceting)
+
+## Soru 13 – `facet_wrap()` ile panel yerleşimi
+
+```{r soru13, fig.width=9, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length)) +
+  geom_point(color = "steelblue") +
+  facet_wrap(~ Species, ncol = 3) +
+  labs(title = "Türler Yan Yana", x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+```
+
+```{r soru13_dikey, fig.width=7, fig.height=9}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length)) +
+  geom_point(color = "steelblue") +
+  facet_wrap(~ Species, ncol = 1) +
+  labs(title = "Türler Alt Alta", x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+```
+
+**Yorum:** `ncol = 3` panelleri yan yana, `ncol = 1` alt alta yerleştirir. Her panel yalnızca ilgili türün gözlemlerini gösterir.
+
+## Soru 14 – Sabit ve serbest ölçekler
+
+```{r soru14, fig.width=9, fig.height=5}
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length)) +
+  geom_point(color = "steelblue") +
+  facet_wrap(~ Species, scales = "fixed") +
+  labs(title = "Sabit Ölçekler", x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length)) +
+  geom_point(color = "steelblue") +
+  facet_wrap(~ Species, scales = "free") +
+  labs(title = "Serbest Ölçekler", x = "Çanak Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Uzunluğu (cm)") +
+  theme_minimal()
+```
+
+**Yorum:** Grupların mutlak konum ve yayılımlarını doğrudan karşılaştırmak için `fixed` genellikle daha uygundur. `free`, her grubun kendi içindeki ayrıntıları göstermeyi kolaylaştırır; ancak eksen aralıkları değiştiği için karşılaştırma dikkat gerektirir.
+
+## Soru 15 – Yeni kategori ve `facet_grid()`
+
+```{r soru15, fig.width=10, fig.height=7}
+iris$Uzunluk_Grubu = ifelse(iris$Sepal.Length < 5.8, "Kısa", "Uzun")
+iris$Uzunluk_Grubu = factor(iris$Uzunluk_Grubu,
+                            levels = c("Kısa", "Uzun"))
+
+table(iris$Uzunluk_Grubu)
+
+ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
+  geom_point(color = "steelblue", alpha = 0.7) +
+  facet_grid(Uzunluk_Grubu ~ Species) +
+  labs(title = "Uzunluk Grubu ve Türlere Göre Taç Yaprak Ölçüleri",
+       x = "Taç Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Genişliği (cm)") +
+  theme_minimal()
+```
+
+**Yorum:** `facet_grid(Uzunluk_Grubu ~ Species)` iki satır (Kısa/Uzun) ve üç sütun (türler) oluşturur. Bazı panellerde az gözlem bulunabilir; bu da veri dağılımının bir özelliğidir.
+
+# F – Çapraz Tablo ve Özet Veriden Grafik
+
+## Soru 16 – Çapraz tablo
+
+```{r soru16}
+capraz_tablo = table(iris$Species, iris$Uzunluk_Grubu)
+capraz_tablo
+```
+
+**Yorum:** Her hücre, ilgili türde ve ilgili çanak yaprak uzunluğu grubunda bulunan çiçek sayısını verir. Örneğin `setosa`–`Kısa` hücresi, çanak yaprak uzunluğu 5,8 cm'den küçük olan setosa çiçeklerini sayar.
+
+## Soru 17 – Çapraz tablodan `geom_col()` grafiği
+
+```{r soru17, fig.width=8, fig.height=5}
+capraz_veri = as.data.frame(capraz_tablo)
+names(capraz_veri) = c("Species", "Uzunluk_Grubu", "Freq")
+head(capraz_veri)
+
+ggplot(capraz_veri, aes(x = Species, y = Freq, fill = Uzunluk_Grubu)) +
+  geom_col() +
+  labs(title = "Tür ve Uzunluk Grubuna Göre Frekanslar",
+       x = "Çiçek Türü", y = "Gözlem Sayısı", fill = "Uzunluk Grubu") +
+  theme_minimal()
+```
+
+**Yorum:** `geom_bar()` ham gözlemleri varsayılan olarak sayar. `geom_col()` ise veri setinde önceden hesaplanmış `Freq` değerlerini sütun yüksekliği olarak kullanır. Burada çapraz tablonun frekansları hazır olduğu için `geom_col()` uygundur.
+
+## Soru 18 – Yan yana ve yığınlı sütunlar
+
+```{r soru18, fig.width=8, fig.height=5}
+ggplot(capraz_veri, aes(x = Species, y = Freq, fill = Uzunluk_Grubu)) +
+  geom_col(position = "dodge") +
+  labs(title = "Yan Yana Sütunlar", x = "Çiçek Türü",
+       y = "Gözlem Sayısı", fill = "Uzunluk Grubu") +
+  theme_minimal()
+
+ggplot(capraz_veri, aes(x = Species, y = Freq, fill = Uzunluk_Grubu)) +
+  geom_col() +
+  labs(title = "Yığınlı Sütunlar", x = "Çiçek Türü",
+       y = "Gözlem Sayısı", fill = "Uzunluk Grubu") +
+  theme_minimal()
+```
+
+**Yorum:** Yan yana sütunlar, Kısa ve Uzun frekanslarını türler arasında doğrudan karşılaştırmayı kolaylaştırır. Yığınlı sütunlar ise her türün toplamını ve toplam içindeki bileşimini göstermede yararlıdır.
+
+## Soru 19 – Çapraz tablodan çok panelli grafik
+
+```{r soru19, fig.width=9, fig.height=5}
+ggplot(capraz_veri, aes(x = Species, y = Freq, fill = Species)) +
+  geom_col() +
+  facet_wrap(~ Uzunluk_Grubu) +
+  labs(title = "Kısa ve Uzun Gruplarında Türlerin Frekansları",
+       x = "Çiçek Türü", y = "Gözlem Sayısı", fill = "Tür") +
+  theme_minimal()
+```
+
+**Yorum:** Kısa ve Uzun grupları ayrı panellerde gösterilir. Varsayılan sabit y ekseni, gruplar arasındaki frekans farklarını karşılaştırmayı kolaylaştırır.
+
+# G – Bağımsız Uygulama
+
+## Soru 20 – Araştırma sorusu ve grafik
+
+**Araştırma sorusu:** Çiçek türlerine göre taç yaprak uzunluğu ve genişliği arasındaki ilişki nasıl değişmektedir?
+
+```{r soru20, fig.width=9, fig.height=5}
+ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +
+  geom_point(size = 3, alpha = 0.7) +
+  facet_wrap(~ Species) +
+  labs(title = "Türlere Göre Taç Yaprak Uzunluğu ve Genişliği",
+       x = "Taç Yaprak Uzunluğu (cm)",
+       y = "Taç Yaprak Genişliği (cm)", color = "Tür") +
+  theme_minimal()
+```
+
+**Örnek yorum:** Taç yaprak uzunluğu ile genişliği arasında genel olarak pozitif bir ilişki gözlenmektedir. `setosa` türü, her iki ölçüm bakımından diğer türlerden belirgin şekilde ayrılmaktadır. `versicolor` ve `virginica` türlerinin ölçümleri bazı bölgelerde birbirine yaklaşsa da `virginica` genel olarak daha büyük taç yapraklara sahiptir. Saçılım grafiği iki sayısal değişken arasındaki ilişkiyi, `facet_wrap()` ise türler arasındaki örüntü farklılıklarını görmeyi sağlar.
+
+---
+
+*Not: Bu dosya öğretim elemanı için çözüm anahtarıdır. Yorumlar grafiklerden çıkarılabilecek örnek değerlendirmelerdir; öğrencilerden kendi gözlemlerini açıklamaları beklenebilir.*
